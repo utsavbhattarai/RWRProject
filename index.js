@@ -244,7 +244,7 @@ app.post('/rest/ticket/', function(req, res){
     });
 })
 
-//  delete game from  db
+//  delete ticket from  db
     app.delete('/rest/ticket/:id', function (req, res){
         ticketMode.findByIdAndRemove(req.params.id).exec().then(doc => {
             if(!doc) {return req.status(404).send('The course with the entered ID is not found!'); } 
