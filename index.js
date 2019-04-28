@@ -1,7 +1,65 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb+srv://utsav776:1234@415clusture-hn15o.mongodb.net/test?retryWrites=true', 
+{
+    useNewUrlParser: true
+}, function(error){
+    if(error){
+        console.log(error);
+    }else {
+        console.log('Connected to Database');
+    }
+}
+);
+
+var ticketSchema = new mongoose.Schema(
+    {
+        id: Number,
+        created_at: Date,
+        updated_at: Date,
+        type: String,
+        subject: String,
+        description: String,
+        priority: String,
+        status: String,
+        recipient: String,
+        submitter: String,
+        assignee_id: Number,
+        follower_ids: [Number, Number],
+        tags: [String, String]
+
+    }
+);
+
+var ticketMode = mongoose.model("Ticket", ticketSchema);
+// ticketMode.create({
+//     "id": 1,
+//         "created_at": "2015-07-20T22:55:29Z",
+//         "updated_at": "2016-05-05T10:38:52Z",
+//         "type": "incident",
+//         "subject": "MFP not working right",
+//         "description": "PC Load Letter? What does that even mean???",
+//         "priority": "med",
+//         "status": "open",
+//         "recipient": "support_example@selu.edu",
+//         "submitter": "Michael_bolton@selu.edu",
+//         "assignee_id": 235323,
+//         "follower_ids": [235323, 234],
+//         "tags": ["enterprise", "printers"],
+// }, function(error, data){
+//     if(error){
+//         console.log('Problem adding a document to the collection');
+//         console.log(error);
+//     }else {
+//         console.log('Data added to the collection: ');
+//         console.log(data);
+//     }
+// });
+
 app.use(express.json());
-const port = 5000
+const port = 5000;
 const tickets  = [
     {
         "id": 1,
@@ -156,31 +214,53 @@ const tickets  = [
 ]
 
 app.get('/', (req, res) => res.send('Welcome to ticket Application!'));
-app.get('/rest/list/', (req, res) => res.send(tickets));
-app.get('/rest/list/:id', (req, res) => {
-    const ticket = tickets.find(c => c.id === parseInt(req.params.id))
-    if(!ticket) res.status(404).send("The course with the entered ID is not found!")
-    res.send(ticket)
+//get the ticket information from DB.
+app.get('/rest/list/', (req, res) => {
+
+    //res.send(tickets);
+    ticketMode.find({}, function(error, data){ //Getting the documents from the collection, and returning it into the variable data, which we send over while rendering the list page.
+        if(error){
+            console.log("Problem finding data");
+            console.log("error")
+        }else{
+            res.send(data);
+        }
     });
-app.post('/rest/ticket/', (req, res) => {
-    const ticket = {
-        id: tickets.length + 1,
-        created_at: req.body.created_at,
-        updated_at: req.body.updated_at,
-        type: req.body.type,
-        subject: req.body.subject,
-        description: req.body.description,
-        priority: req.body.priority,
-        status: req.body.status,
-        recipient: req.body.recipient,
-        submitter: req.body.submitter,
-        assignee_id: req.body.assignee_id,
-        follower_ids: req.body.follower_ids,
-        tags: req.body.tags
-    };
-    tickets.push(ticket);
-    res.send(ticket); 
+
 });
+//get specific ticket id from database
+app.get('/rest/list/:id', function(req, res) {
+    ticketMode.findById(req.params.id).then(doc => {
+        if(!doc){return req.status(404).end();}
+        return res.status(200).json(doc);
+    }).catch(err => console.log(err));
+});
+
+// save information in db
+app.post('/rest/ticket/', function(req, res){
+    var tic = new ticketMode(req.body);
+    tic.save(function(err, tic){
+        res.json(tic);
+    });
+})
+
+//  delete game from  db
+    app.delete('/rest/ticket/:id', function (req, res){
+        ticketMode.findByIdAndRemove(req.params.id).exec().then(doc => {
+            if(!doc) {return req.status(404).send('The course with the entered ID is not found!'); } 
+            return res.status(204).json(doc);
+        }).catch(err => console.log(err));
+    })
+
+    //update the ticket information in db
+    app.put('/rest/ticket/:id', function(req, res) {
+        var conditions = {_id: req.params.id};
+
+        ticketMode.update(conditions, req.body).then(doc => {
+            if(!doc) {return req.status(404).send('The course with the entered ID is not found!'); } 
+            return res.status(200).json(doc);
+        }).catch(err => console.log(err));
+    })
 
 
 app.listen(process.env.PORT || port, () => console.log(`Example app listening on port ${port}!`));
