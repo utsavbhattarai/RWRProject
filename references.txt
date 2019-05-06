@@ -1,0 +1,3 @@
+https://devcenter.heroku.com/articles/git#creating-a-heroku-remote
+https://www.youtube.com/playlist?list=PL8jcXf-CLpxpndi2RhEKp8284wNtONe7H
+https://www.youtube.com/watch?v=pKd0Rpw7O48&t=2856s

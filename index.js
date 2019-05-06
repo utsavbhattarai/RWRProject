@@ -34,30 +34,6 @@ var ticketSchema = new mongoose.Schema(
 );
 
 var ticketMode = mongoose.model("Ticket", ticketSchema);
-// ticketMode.create({
-//     "id": 1,
-//         "created_at": "2015-07-20T22:55:29Z",
-//         "updated_at": "2016-05-05T10:38:52Z",
-//         "type": "incident",
-//         "subject": "MFP not working right",
-//         "description": "PC Load Letter? What does that even mean???",
-//         "priority": "med",
-//         "status": "open",
-//         "recipient": "support_example@selu.edu",
-//         "submitter": "Michael_bolton@selu.edu",
-//         "assignee_id": 235323,
-//         "follower_ids": [235323, 234],
-//         "tags": ["enterprise", "printers"],
-// }, function(error, data){
-//     if(error){
-//         console.log('Problem adding a document to the collection');
-//         console.log(error);
-//     }else {
-//         console.log('Data added to the collection: ');
-//         console.log(data);
-//     }
-// });
-
 app.use(express.json());
 const port = 5000;
 const tickets  = [
