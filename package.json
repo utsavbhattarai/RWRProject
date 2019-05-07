@@ -11,6 +11,10 @@
   "description": "",
   "dependencies": {
     "express": "^4.16.4",
-    "mongoose": "^5.5.4"
+    "js2xmlparser": "^4.0.0",
+    "jsontoxml": "^1.0.1",
+    "mongoose": "^5.5.4",
+    "xml-js": "^1.6.11",
+    "xml2json": "^0.11.2"
   }
 }

@@ -1,6 +1,10 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+var convert = require('xml-js');
+var parser = require('xml2json');
+
+
 
 mongoose.connect('mongodb+srv://utsav776:1234@415clusture-hn15o.mongodb.net/test?retryWrites=true', 
 {
@@ -201,6 +205,7 @@ app.get('/rest/list/', (req, res) => {
         }else{
             res.send(data);
         }
+        
     });
 
 });
@@ -211,6 +216,18 @@ app.get('/rest/list/:id', function(req, res) {
         return res.status(200).json(doc);
     }).catch(err => console.log(err));
 });
+
+app.get('/rest/xml/ticket/:id', function(req, res){
+    var options = {compact: true, ignoreComment: true, spaces: 4, fullTagEmptyElement: true};
+       ticketMode.findById(req.params.id).then(doc => {
+        if(!doc){return req.status(404).end();}
+        console.log(doc);
+        var stringified = JSON.stringify(doc);
+        var xml = convert.json2xml(stringified, options);
+        console.log(xml);
+        return res.status(200).json(xml);
+    }).catch(err => console.log(err));
+})
 
 // save information in db
 app.post('/rest/ticket/', function(req, res){
@@ -238,5 +255,6 @@ app.post('/rest/ticket/', function(req, res){
         }).catch(err => console.log(err));
     })
 
+    
 
 app.listen(process.env.PORT || port, () => console.log(`Example app listening on port ${port}!`));
