@@ -3,7 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 var convert = require('xml-js');
 var parser = require('xml2json');
-
+var fs = require('fs');
 
 
 mongoose.connect('mongodb+srv://utsav776:1234@415clusture-hn15o.mongodb.net/test?retryWrites=true', 
@@ -18,8 +18,7 @@ mongoose.connect('mongodb+srv://utsav776:1234@415clusture-hn15o.mongodb.net/test
 }
 );
 
-var ticketSchema = new mongoose.Schema(
-    {
+var ticketSchema = new mongoose.Schema({
         id: Number,
         created_at: Date,
         updated_at: Date,
@@ -31,11 +30,9 @@ var ticketSchema = new mongoose.Schema(
         recipient: String,
         submitter: String,
         assignee_id: Number,
-        follower_ids: [Number, Number],
+        follower_ids: [String, String],
         tags: [String, String]
-
-    }
-);
+    });
 
 var ticketMode = mongoose.model("Ticket", ticketSchema);
 app.use(express.json());
@@ -217,6 +214,7 @@ app.get('/rest/list/:id', function(req, res) {
     }).catch(err => console.log(err));
 });
 
+// get the xml file from JSON 
 app.get('/rest/xml/ticket/:id', function(req, res){
     var options = {compact: true, ignoreComment: true, spaces: 4, fullTagEmptyElement: true};
        ticketMode.findById(req.params.id).then(doc => {
@@ -229,32 +227,44 @@ app.get('/rest/xml/ticket/:id', function(req, res){
     }).catch(err => console.log(err));
 })
 
+// save the xml to JSON to the server
+app.post('/rest/xml/ticket/:id', function(req, res){
+    fs.readFile( './ticket.xml', function(err, data) {
+        var xml = data.toString();
+        var json = convert.xml2json(xml.toString(), {compact: true, spaces: 4})
+            //makes a web request and matches to the schema provided.
+            var tic = new ticketMode(JSON.parse(json));
+            // saves the json from xml
+            tic.save(function(err, tic){
+                res.send(tic);
+            });
+        console.log(json);
+    });
+})
 // save information in db
 app.post('/rest/ticket/', function(req, res){
-    var tic = new ticketMode(req.body);
+    var tic = new ticketMode(req.xml);
     tic.save(function(err, tic){
         res.json(tic);
     });
 })
 
 //  delete ticket from  db
-    app.delete('/rest/ticket/:id', function (req, res){
+app.delete('/rest/ticket/:id', function (req, res){
         ticketMode.findByIdAndRemove(req.params.id).exec().then(doc => {
             if(!doc) {return req.status(404).send('The course with the entered ID is not found!'); } 
             return res.status(204).json(doc);
         }).catch(err => console.log(err));
-    })
+})
 
     //update the ticket information in db
-    app.put('/rest/ticket/:id', function(req, res) {
+app.put('/rest/ticket/:id', function(req, res) {
         var conditions = {_id: req.params.id};
 
         ticketMode.update(conditions, req.body).then(doc => {
             if(!doc) {return req.status(404).send('The course with the entered ID is not found!'); } 
             return res.status(200).json(doc);
         }).catch(err => console.log(err));
-    })
-
-    
+})
 
 app.listen(process.env.PORT || port, () => console.log(`Example app listening on port ${port}!`));

@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "express": "^4.16.4",
     "js2xmlparser": "^4.0.0",
     "jsontoxml": "^1.0.1",
